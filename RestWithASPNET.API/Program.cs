@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
 using Microsoft.Extensions.Configuration;
 using RestWithASPNET.API.Data;
 using RestWithASPNET.API.Repositories;
+using RestWithASPNET.API.Repositories.Generic;
 using RestWithASPNET.API.Repositories.Interfaces;
 using RestWithASPNET.API.Services;
 using RestWithASPNET.API.Services.Interfaces;
@@ -20,7 +21,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IPersonService, PersonService>();
+builder.Services.AddScoped<IBossService, BossService>();
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 
 builder.Services.AddDbContext<ProjetoContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"

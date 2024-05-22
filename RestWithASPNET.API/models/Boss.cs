@@ -1,8 +1,9 @@
-﻿namespace RestWithASPNET.API.models
+﻿using RestWithASPNET.API.models.Base;
+
+namespace RestWithASPNET.API.models
 {
-    public class Boss
+    public class Boss : BaseEntity
     {
-        public int Id { get; set; }
         public string Name { get; set; }
         public string Comment { get; set; }
     }

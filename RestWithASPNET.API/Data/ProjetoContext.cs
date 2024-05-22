@@ -11,6 +11,7 @@ namespace RestWithASPNET.API.Data
         }
 
         public DbSet<Person> Persons { get; set; }
+        public DbSet<Boss> Bosses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
