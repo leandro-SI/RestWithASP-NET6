@@ -1,9 +1,9 @@
 ﻿namespace RestWithASPNET.API.models
 {
-    public class Person
+    public class Boss
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string Gender { get; set; }
+        public string Comment { get; set; }
     }
 }
