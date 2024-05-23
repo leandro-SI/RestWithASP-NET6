@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RestWithASPNET.API.Data;
 
@@ -11,9 +12,10 @@ using RestWithASPNET.API.Data;
 namespace RestWithASPNET.API.Data.Migrations
 {
     [DbContext(typeof(ProjetoContext))]
-    partial class ProjetoContextModelSnapshot : ModelSnapshot
+    [Migration("20240522195812_Autenticacao")]
+    partial class Autenticacao
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

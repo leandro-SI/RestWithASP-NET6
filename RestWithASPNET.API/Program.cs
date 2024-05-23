@@ -3,7 +3,11 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Net.Http.Headers;
 using RestWithASPNET.API.Data;
+using RestWithASPNET.API.Hypermedia.Enricher;
+using RestWithASPNET.API.Hypermedia.Filters;
+using RestWithASPNET.API.Mappings;
 using RestWithASPNET.API.Repositories;
 using RestWithASPNET.API.Repositories.Generic;
 using RestWithASPNET.API.Repositories.Interfaces;
@@ -15,6 +19,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddCors(options => options.AddDefaultPolicy(builder =>
+{
+    builder.AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader();
+}));
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -24,6 +35,8 @@ builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<IBossService, BossService>();
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddDbContext<ProjetoContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"
@@ -36,6 +49,20 @@ if (builder.Environment.IsDevelopment())
 
     MigrateDatabase(connection);
 }
+
+builder.Services.AddMvc(options =>
+{
+    options.RespectBrowserAcceptHeader = true;
+
+    options.FormatterMappings.SetMediaTypeMappingForFormat("xml", MediaTypeHeaderValue.Parse("application/xml"));
+    options.FormatterMappings.SetMediaTypeMappingForFormat("json", MediaTypeHeaderValue.Parse("application/json"));
+})
+.AddXmlSerializerFormatters();
+
+var filterOptions = new HyperMediaFilterOptions();
+filterOptions.ContentRespondeEnricherList.Add(new PersonEnricher());
+
+builder.Services.AddSingleton(filterOptions);
 
 
 void MigrateDatabase(SqlConnectionStringBuilder connection)
@@ -76,9 +103,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors();
+
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapControllerRoute("DefaultApi", "v{version=apiVersion}/{controller=values}/{id?}");
 
 
 // Garantir que o banco de dados seja criado

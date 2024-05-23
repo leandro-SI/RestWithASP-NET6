@@ -1,6 +1,6 @@
 ﻿namespace RestWithASPNET.API.Hypermedia.Abstract
 {
-    public interface ISupportHypermedia
+    public interface ISupportsHyperMedia
     {
         List<HyperMediaLink> Links { get; set; }
     }

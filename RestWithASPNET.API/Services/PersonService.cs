@@ -1,5 +1,7 @@
-﻿using RestWithASPNET.API.Data;
+﻿using AutoMapper;
+using RestWithASPNET.API.Data;
 using RestWithASPNET.API.models;
+using RestWithASPNET.API.models.Dtos;
 using RestWithASPNET.API.Repositories.Interfaces;
 using RestWithASPNET.API.Services.Interfaces;
 
@@ -9,27 +11,35 @@ namespace RestWithASPNET.API.Services
     {
 
         private readonly IPersonRepository _personRepository;
+        private readonly IMapper _mapper;
 
-        public PersonService(IPersonRepository personRepository)
+        public PersonService(IPersonRepository personRepository, IMapper mapper)
         {
             _personRepository = personRepository;
+            _mapper = mapper;
         }
 
-        public Person Create(Person person)
+        public PersonDTO Create(PersonDTO personDto)
         {
-            var result = _personRepository.Create(person);
+            var personEntity = _mapper.Map<Person>(personDto);
 
-            return result;
+            var result = _personRepository.Create(personEntity);
+
+            return _mapper.Map<PersonDTO>(result);
         }
 
-        public List<Person> FindAll()
+        public List<PersonDTO> FindAll()
         {
-            return _personRepository.FindAll();
+            var persons = _personRepository.FindAll();
+
+            return _mapper.Map<List<PersonDTO>>(persons);
         }
 
-        public Person FindById(int id)
+        public PersonDTO FindById(int id)
         {
-            return _personRepository.FindById(id);
+            var person = _personRepository.FindById(id);
+
+            return _mapper.Map<PersonDTO>(person);
         }
 
         public void Delete(int id)
@@ -37,11 +47,13 @@ namespace RestWithASPNET.API.Services
             _personRepository.Delete(id);
         }
 
-        public Person Update(Person person)
+        public PersonDTO Update(PersonDTO personDto)
         {
-            var result = _personRepository.Update(person);
+            var personEntity = _mapper.Map<Person>(personDto);
 
-            return result;
+            var result = _personRepository.Update(personEntity);
+
+            return _mapper.Map<PersonDTO>(result);
         }
     }
 }

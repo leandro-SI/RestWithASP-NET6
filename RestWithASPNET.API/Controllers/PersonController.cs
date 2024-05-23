@@ -1,7 +1,9 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using RestWithASPNET.API.Hypermedia.Filters;
 using RestWithASPNET.API.models;
+using RestWithASPNET.API.models.Dtos;
 using RestWithASPNET.API.Services.Interfaces;
 
 namespace RestWithASPNET.API.Controllers
@@ -19,12 +21,14 @@ namespace RestWithASPNET.API.Controllers
         }
 
         [HttpGet]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult Get()
         {
             return Ok(_personService.FindAll());
         }
 
         [HttpGet("{id}")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult Get(int id)
         {
             var person = _personService.FindById(id);
@@ -36,23 +40,25 @@ namespace RestWithASPNET.API.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] Person person)
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult Post([FromBody] PersonDTO personDto)
         {
-            if (person == null)
+            if (personDto == null)
                 return BadRequest("Person null");
 
-            var result = _personService.Create(person);
+            var result = _personService.Create(personDto);
 
             return Ok(result);
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] Person person)
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult Put([FromBody] PersonDTO personDto)
         {
-            if (person == null)
+            if (personDto == null)
                 return BadRequest("Person null");
 
-            var result = _personService.Update(person);
+            var result = _personService.Update(personDto);
 
             return Ok(result);
         }

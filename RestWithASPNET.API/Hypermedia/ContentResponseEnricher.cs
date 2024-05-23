@@ -6,14 +6,14 @@ using System.Collections.Concurrent;
 
 namespace RestWithASPNET.API.Hypermedia
 {
-    public abstract class ContentResponseEnricher<T> : IResponseEnricher where T : ISupportHypermedia
+    public abstract class ContentResponseEnricher<T> : IResponseEnricher where T : ISupportsHyperMedia
     {
         protected ContentResponseEnricher()
         {
             
         }
 
-        public bool CanEnrich(Type contentType)
+        public virtual bool CanEnrich(Type contentType)
         {
             return contentType == typeof(T) || contentType == typeof(List<T>);
         }
