@@ -9,5 +9,10 @@ namespace RestWithASPNET.API.Repositories.Interfaces
         List<Person> FindAll();
         Person Update(Person person);
         void Delete(int id);
+        Person Disable(int id);
+        List<Person> FindByName(string name);
+        List<Person> FindWithPagedSearch(string query);
+        int GetCount(string query);
+
     }
 }

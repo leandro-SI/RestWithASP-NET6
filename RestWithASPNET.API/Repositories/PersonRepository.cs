@@ -1,4 +1,5 @@
-﻿using RestWithASPNET.API.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using RestWithASPNET.API.Data;
 using RestWithASPNET.API.models;
 using RestWithASPNET.API.Repositories.Interfaces;
 
@@ -44,6 +45,63 @@ namespace RestWithASPNET.API.Repositories
             _context.Persons.Update(person);
 
             return person;
+        }
+
+        public Person Disable(int id)
+        {
+            if (!_context.Persons.Any(p => p.Id.Equals(id)))
+                return null;
+
+            var user = _context.Persons.SingleOrDefault(p =>  p.Id == id);
+
+            if (user != null)
+            {
+                user.Enabled = false;
+
+                try
+                {
+                    _context.Entry(user).CurrentValues.SetValues(user);
+                    _context.SaveChanges();
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+
+            return user;
+        }
+
+        public List<Person> FindByName(string name)
+        {
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                return _context.Persons.Where(p => p.Name.Contains(name)).ToList();
+            }
+            return null;
+            
+        }
+
+        public List<Person> FindWithPagedSearch(string query)
+        {
+            return _context.Persons.FromSqlRaw(query).ToList();
+        }
+
+        public int GetCount(string query)
+        {
+            var result = "";
+
+            using (var connection = _context.Database.GetDbConnection())
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = query;
+                    result = command.ExecuteScalar().ToString();
+                }
+            }
+
+            return int.Parse(result);
         }
     }
 }

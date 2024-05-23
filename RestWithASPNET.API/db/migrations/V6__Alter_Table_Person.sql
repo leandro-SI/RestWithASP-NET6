@@ -1,0 +1,2 @@
+ALTER TABLE Persons
+ADD [Enabled] BIT NOT NULL DEFAULT 1;
