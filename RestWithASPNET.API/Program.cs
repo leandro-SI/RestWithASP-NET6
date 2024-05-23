@@ -31,6 +31,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped<IFileService, FileService>();
+
 builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<IBossService, BossService>();
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
