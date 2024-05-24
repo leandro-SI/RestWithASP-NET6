@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  demorestdb:
+    container_name: api-db
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - 8002:1434
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=admin123!
+  restwithaspnet.api:
+    container_name: demo-rest-api
+    image: ${DOCKER_REGISTRY-}restwithaspnetapi
+    build:
+      context: .
+      dockerfile: RestWithASPNET.API/Dockerfile
+    ports:
+      - 8001:80
+    depends_on:
+      - demorestdb
+    environment:
+      - DB_HOST=demorestdb
+      - DB_NAME=RestWithASPNETAPI
+      - DB_SA_PASSWORD=admin123!

@@ -45,13 +45,13 @@ builder.Services.AddDbContext<ProjetoContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"
                 ), b => b.MigrationsAssembly(typeof(ProjetoContext).Assembly.FullName)));
 
-if (builder.Environment.IsDevelopment())
-{
-    var connection = new SqlConnectionStringBuilder(builder.Configuration.GetConnectionString("DefaultConnection"
-                ));
+//if (builder.Environment.IsDevelopment())
+//{
+//    var connection = new SqlConnectionStringBuilder(builder.Configuration.GetConnectionString("DefaultConnection"
+//                ));
 
-    MigrateDatabase(connection);
-}
+//    MigrateDatabase(connection);
+//}
 
 builder.Services.AddMvc(options =>
 {
