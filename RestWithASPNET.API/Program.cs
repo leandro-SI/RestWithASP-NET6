@@ -1,9 +1,14 @@
 using EvolveDb;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
+using RestWithASPNET.API.Configurations;
 using RestWithASPNET.API.Data;
 using RestWithASPNET.API.Hypermedia.Enricher;
 using RestWithASPNET.API.Hypermedia.Filters;
@@ -14,6 +19,7 @@ using RestWithASPNET.API.Repositories.Interfaces;
 using RestWithASPNET.API.Services;
 using RestWithASPNET.API.Services.Interfaces;
 using Serilog;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,19 +45,20 @@ builder.Services.AddScoped<IBossService, BossService>();
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ILoginService, LoginService>();
+
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddDbContext<ProjetoContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"
                 ), b => b.MigrationsAssembly(typeof(ProjetoContext).Assembly.FullName)));
 
-//if (builder.Environment.IsDevelopment())
-//{
-//    var connection = new SqlConnectionStringBuilder(builder.Configuration.GetConnectionString("DefaultConnection"
-//                ));
-
-//    MigrateDatabase(connection);
-//}
+if (builder.Environment.IsDevelopment())
+{
+    MigrateDatabase();
+}
 
 builder.Services.AddMvc(options =>
 {
@@ -68,7 +75,7 @@ filterOptions.ContentRespondeEnricherList.Add(new PersonEnricher());
 builder.Services.AddSingleton(filterOptions);
 
 
-void MigrateDatabase(SqlConnectionStringBuilder connection)
+void MigrateDatabase()
 {
     try
     {
@@ -95,10 +102,52 @@ Log.Logger = new LoggerConfiguration()
 //Versioning API
 builder.Services.AddApiVersioning();
 
+
+//Autenticação
+var tokenConfiguration = new TokenConfiguration();
+
+new ConfigureFromConfigurationOptions<TokenConfiguration>(
+    builder.Configuration.GetSection("TokenConfiguration")
+).Configure(tokenConfiguration);
+
+builder.Services.AddSingleton(tokenConfiguration);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = tokenConfiguration.Issuer,
+            ValidAudience = tokenConfiguration.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenConfiguration.Secret))
+        };
+    });
+
+builder.Services.AddAuthorization(auth =>
+{
+    auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
+        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+        .RequireAuthenticatedUser().Build());
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+else
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -108,13 +157,14 @@ app.UseHttpsRedirection();
 
 app.UseCors();
 
+
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapControllerRoute("DefaultApi", "v{version=apiVersion}/{controller=values}/{id?}");
 
 
-// Garantir que o banco de dados seja criado
+//Garantir que o banco de dados seja criado
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ProjetoContext>();

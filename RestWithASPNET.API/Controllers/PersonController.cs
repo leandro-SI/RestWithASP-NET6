@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RestWithASPNET.API.Hypermedia.Filters;
@@ -9,6 +10,7 @@ using RestWithASPNET.API.Services.Interfaces;
 namespace RestWithASPNET.API.Controllers
 {
     [ApiVersion("1")]
+    [Authorize("Bearer")]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     public class PersonController : ControllerBase

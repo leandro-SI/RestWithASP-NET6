@@ -16,10 +16,10 @@ services:
       context: .
       dockerfile: RestWithASPNET.API/Dockerfile
     ports:
-      - 8001:80
+      - 8080:8080
     depends_on:
       - demorestdb
     environment:
       - DB_HOST=demorestdb
-      - DB_NAME=RestWithASPNETAPI
+      - DB_NAME=leo-rest-db
       - DB_SA_PASSWORD=admin123!

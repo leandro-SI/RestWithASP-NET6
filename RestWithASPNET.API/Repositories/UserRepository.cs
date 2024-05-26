@@ -19,8 +19,33 @@ namespace RestWithASPNET.API.Repositories
         public User ValidateCredentials(UserDTO user)
         {
             var pass = ComputeHash(user.Password, SHA256.Create());
-            return _context.Users.FirstOrDefault(u =>
-            (u.UserName == user.UserName) && (u.Password == user.Password));
+
+            var userResponse = _context.Users.FirstOrDefault(u => u.UserName == user.UserName && u.Password == pass.ToString());
+
+            return userResponse;
+        }
+
+        public User RefreshUserInfo(User user)
+        {
+            if (!_context.Users.Any(u => u.Id.Equals(user.Id)))
+                return null;
+
+            var result = _context.Users.SingleOrDefault(p => p.Id.Equals(user.Id));
+
+            if (result != null)
+            {
+                try
+                {
+                    _context.Entry(result).CurrentValues.SetValues(user);
+                    _context.SaveChanges();
+                    return result;
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+            return result;
         }
 
         private object ComputeHash(string password, HashAlgorithm algorithm)
