@@ -34,5 +34,21 @@ namespace RestWithASPNET.API.Controllers
 
             return Ok(token);
         }
+
+        [HttpPost]
+        [Route("refresh")]
+        public IActionResult Refresh([FromBody] TokenDTO tokenDto)
+        {
+
+            if (tokenDto == null)
+                return BadRequest("Invalid client request.");
+
+            var token = _loginService.ValidateCredentials(tokenDto);
+
+            if (token == null)
+                return BadRequest("Invalid client request.");
+
+            return Ok(token);
+        }
     }
 }

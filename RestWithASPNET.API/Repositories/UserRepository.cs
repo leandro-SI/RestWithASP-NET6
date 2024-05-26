@@ -25,6 +25,11 @@ namespace RestWithASPNET.API.Repositories
             return userResponse;
         }
 
+        public User ValidateCredentials(string userName)
+        {
+            return _context.Users.SingleOrDefault(u => u.UserName == userName);
+        }
+
         public User RefreshUserInfo(User user)
         {
             if (!_context.Users.Any(u => u.Id.Equals(user.Id)))
@@ -62,5 +67,6 @@ namespace RestWithASPNET.API.Repositories
 
             return builder.ToString();
         }
+
     }
 }

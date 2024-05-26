@@ -54,5 +54,39 @@ namespace RestWithASPNET.API.Services
                 refreshToken
             );
         }
+
+        public TokenDTO ValidateCredentials(TokenDTO token)
+        {
+            var accessToken = token.AccessToken;
+            var refreshToken = token.RefreshToken;
+
+            var principal = _tokenService.GetPrincipalFromExpiryToken(accessToken);
+
+            var userName = principal.Identity.Name;
+
+            var user = _userRepository.ValidateCredentials(userName);
+
+            if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now) 
+                return null;
+
+            accessToken = _tokenService.GenerateAccessToken(principal.Claims);
+            refreshToken = _tokenService.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+
+            DateTime createDate = DateTime.UtcNow;
+            DateTime expirationDate = createDate.AddMinutes(_configuration.Minutes);
+
+            _userRepository.RefreshUserInfo(user);
+
+            return new TokenDTO(
+                true,
+                createDate.ToString(DATE_FORMAT),
+                expirationDate.ToString(DATE_FORMAT),
+                accessToken,
+                refreshToken
+            );
+
+        }
     }
 }
