@@ -53,6 +53,20 @@ namespace RestWithASPNET.API.Repositories
             return result;
         }
 
+        public bool RevokeToken(string userName)
+        {
+            var user = _context.Users.SingleOrDefault(u => u.UserName == userName);
+
+            if (user is null)
+                return false;
+
+            user.RefreshToken = null;
+
+            _context.SaveChanges();
+
+            return true;
+        }
+
         private object ComputeHash(string password, HashAlgorithm algorithm)
         {
             byte[] ínputBytes = Encoding.UTF8.GetBytes(password);

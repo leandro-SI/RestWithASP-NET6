@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RestWithASPNET.API.models.Dtos;
@@ -49,6 +50,21 @@ namespace RestWithASPNET.API.Controllers
                 return BadRequest("Invalid client request.");
 
             return Ok(token);
+        }
+
+        [HttpGet]
+        [Route("revoke")]
+        [Authorize("Bearer")]
+        public IActionResult Revoke()
+        {
+
+            var userName = User.Identity.Name;
+            var result = _loginService.RevokeToken(userName);
+
+            if (!result)
+                return BadRequest("Invalid client request.");
+
+            return NoContent();
         }
     }
 }

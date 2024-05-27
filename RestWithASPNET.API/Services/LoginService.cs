@@ -88,5 +88,10 @@ namespace RestWithASPNET.API.Services
             );
 
         }
+
+        public bool RevokeToken(string userName)
+        {
+            return _userRepository.RevokeToken(userName);
+        }
     }
 }
